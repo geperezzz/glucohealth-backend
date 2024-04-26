@@ -1,11 +1,14 @@
-import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Patch, Post, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { NurseNotFoundError, NurseRepository } from './nurse.repository';
 import { NurseCreationDto } from './dtos/nurse-creation.dto';
 import { NurseDto } from './dtos/nurse.dto';
 import { NurseUpdateDto } from './dtos/nurse-update.dto';
-import { NurseUniqueTraitDto, OptionalNurseUniqueTraitDto } from './dtos/nurse-unique-trait.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { NurseFiltersDto } from './dtos/nurse-filters.dto';
+import { NursePageDto } from './dtos/nurse-page.dto';
+import { PaginationOptionsDto } from 'src/pagination/dtos/pagination-options.dto';
+import { NurseUniqueTraitDto } from './dtos/nurse-unique-trait.dto';
 
 @Controller('nurses')
 @ApiTags('Nurses')
@@ -21,27 +24,28 @@ export class NurseController {
     const nurse = await this.nurseRepository.create(nurseCreationDto);
     return NurseDto.fromModel(nurse);
   }
-  
+
   @Get()
-  async findOneOrMany(
-    @Query() optionalNurseUniqueTraitDto: OptionalNurseUniqueTraitDto,
-  ): Promise<NurseDto | NurseDto[]> {
-    const nurseUniqueTraitDto = OptionalNurseUniqueTraitDto.toNonOptional(optionalNurseUniqueTraitDto);
-    if (!nurseUniqueTraitDto) {
-      return await this.findMany();
-    }
-    return await this.findOne(nurseUniqueTraitDto);
-  }
-
-  private async findMany(): Promise<NurseDto[]> {
-    const nurses = await this.nurseRepository.findMany();
-    return nurses.map(NurseDto.fromModel);
-  }
-
-  private async findOne(nurseUniqueTraitDto: NurseUniqueTraitDto): Promise<NurseDto> {
-    const nurse = await this.nurseRepository.findOne(
-      NurseUniqueTraitDto.toModel(nurseUniqueTraitDto),
+  async findPage(
+    @Query() paginationOptionsDto: PaginationOptionsDto,
+    @Query() nurseFiltersDto: NurseFiltersDto,
+  ): Promise<NursePageDto> {
+    const nursePage = await this.nurseRepository.findPage(
+      PaginationOptionsDto.toModel(paginationOptionsDto),
+      nurseFiltersDto,
     );
+    const nurseDtos = nursePage.items.map(NurseDto.fromModel);
+    return {
+      ...nursePage,
+      items: nurseDtos,
+    };
+  }
+
+  @Get('unique')
+  async findOne(
+    @Query() nurseUniqueTraitDto: NurseUniqueTraitDto
+  ): Promise<NurseDto> {
+    const nurse = await this.nurseRepository.findOne(nurseUniqueTraitDto);
     if (!nurse) {
       throw new NotFoundException(
         'Nurse not found',
@@ -58,7 +62,7 @@ export class NurseController {
   ): Promise<NurseDto> {
     try {
       const nurse = await this.nurseRepository.update(
-        NurseUniqueTraitDto.toModel(nurseUniqueTraitDto),
+        nurseUniqueTraitDto,
         nurseUpdateDto
       );
       return NurseDto.fromModel(nurse);
@@ -81,9 +85,7 @@ export class NurseController {
     @Query() nurseUniqueTraitDto: NurseUniqueTraitDto,
   ): Promise<NurseDto> {
     try {
-      const nurse = await this.nurseRepository.delete(
-        NurseUniqueTraitDto.toModel(nurseUniqueTraitDto),
-      );
+      const nurse = await this.nurseRepository.delete(nurseUniqueTraitDto);
       return NurseDto.fromModel(nurse);
     } catch (error) {
       if (error instanceof NurseNotFoundError) {

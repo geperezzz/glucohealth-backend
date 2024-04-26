@@ -1,10 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 import * as generator from 'generate-password';
 import * as bcrypt from 'bcrypt';
 
 import { DrizzleClient } from 'src/drizzle/drizzle.client';
 import { nurseTable } from './nurse.table';
+import { PaginationOptions } from 'src/pagination/models/pagination-options.model';
+import { Page } from 'src/pagination/models/page.model';
 
 export type Nurse = typeof nurseTable.$inferSelect;
 export type NurseUniqueTrait = {
@@ -17,6 +19,8 @@ export type NurseCreation = Omit<typeof nurseTable.$inferInsert, 'password'> & {
 export type NurseUpdate = Partial<NurseCreation>;
 
 export class NurseNotFoundError extends Error {}
+
+export type NurseFilters = Partial<Nurse>;
 
 @Injectable()
 export class NurseRepository {
@@ -50,13 +54,41 @@ export class NurseRepository {
     });
   }
 
-  async findMany(): Promise<Nurse[]> {
+  async findPage(
+    paginationOptions: PaginationOptions,
+    filters: NurseFilters,
+  ): Promise<Page<Nurse>> {
     return await this.drizzleClient.transaction(async transaction => {
-      const nurses = await transaction
+      const filteredNursesQuery = transaction
         .select()
-        .from(nurseTable);
+        .from(nurseTable)
+        .where(
+          and(
+            ...Object.entries(filters)
+              .filter(([, fieldValue]) => fieldValue !== undefined)
+              .map(([fieldName, fieldValue]) => eq(nurseTable[fieldName as keyof Nurse], fieldValue)),
+          ),
+        )
+        .as('filtered_nurses');
       
-      return nurses;
+      const filteredNursesPage = await transaction
+        .select()
+        .from(filteredNursesQuery)
+        .offset((paginationOptions.pageIndex - 1) * paginationOptions.itemsPerPage)
+        .limit(paginationOptions.itemsPerPage);
+
+      const [{ filteredNursesCount }] = await transaction
+        .select({
+          filteredNursesCount: count(filteredNursesQuery.id),
+        })
+        .from(filteredNursesQuery);
+      
+      return {
+        items: filteredNursesPage,
+        ...paginationOptions,
+        pageCount: Math.ceil(filteredNursesCount / paginationOptions.itemsPerPage),
+        itemCount: filteredNursesCount,
+      };
     });
   }
 
