@@ -9,6 +9,9 @@ import { version } from '../package.json';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: process.env.FRONTEND_URL,
+  });
   addSwaggerSupport(app);
   await app.listen(process.env.APP_PORT || 3000);
 }
