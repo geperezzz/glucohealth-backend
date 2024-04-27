@@ -10,14 +10,14 @@ import { NursePageDto } from './dtos/nurse-page.dto';
 import { PaginationOptionsDto } from 'src/pagination/dtos/pagination-options.dto';
 import { NurseUniqueTraitDto } from './dtos/nurse-unique-trait.dto';
 
-@Controller('nurses')
+@Controller()
 @ApiTags('Nurses')
 export class NurseController {
   constructor(
     private readonly nurseRepository: NurseRepository,
   ) {}
   
-  @Post()
+  @Post('/nurses/')
   async create(
     @Body() nurseCreationDto: NurseCreationDto,
   ): Promise<NurseDto> {
@@ -25,7 +25,7 @@ export class NurseController {
     return NurseDto.fromModel(nurse);
   }
 
-  @Get()
+  @Get('/nurses/')
   async findPage(
     @Query() paginationOptionsDto: PaginationOptionsDto,
     @Query() nurseFiltersDto: NurseFiltersDto,
@@ -41,7 +41,7 @@ export class NurseController {
     };
   }
 
-  @Get('unique')
+  @Get('/nurse/')
   async findOne(
     @Query() nurseUniqueTraitDto: NurseUniqueTraitDto
   ): Promise<NurseDto> {
@@ -55,7 +55,7 @@ export class NurseController {
     return NurseDto.fromModel(nurse);
   }
 
-  @Patch()
+  @Patch('/nurses/')
   async update(
     @Body() nurseUpdateDto: NurseUpdateDto,
     @Query() nurseUniqueTraitDto: NurseUniqueTraitDto,
@@ -80,7 +80,7 @@ export class NurseController {
     }
   }
 
-  @Delete()
+  @Delete('/nurses/')
   async delete(
     @Query() nurseUniqueTraitDto: NurseUniqueTraitDto,
   ): Promise<NurseDto> {
