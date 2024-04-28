@@ -8,10 +8,6 @@ export const patientCreationDtoSchema = patientDtoSchema
   .required({
     email: true,
     nationalId: true
-  })
-  .extend({
-    id: patientDtoSchema.shape.id.optional(),
-    password: z.string().trim().min(1).optional(),
   });
 
 export class PatientCreationDto extends createZodDto(patientCreationDtoSchema) {}
