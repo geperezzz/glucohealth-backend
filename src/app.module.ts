@@ -5,10 +5,12 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { NurseModule } from './nurse/nurse.module';
 import { ZodErrorFilter } from './zod/zod-error.filter';
 import { SuccessfulResponseBuilderInterceptor } from './successful-response-builder/successful-response-builder.interceptor';
+import { PatientModule } from './patient/patient.module';
 
 @Module({
   imports: [
     NurseModule,
+    PatientModule,
   ],
   providers: [
     {

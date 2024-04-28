@@ -11,6 +11,7 @@ import { Page } from 'src/pagination/models/page.model';
 export type Nurse = typeof nurseTable.$inferSelect;
 export type NurseUniqueTrait = {
   id?: Nurse['id'];
+  email?: Nurse['email'];
   nationalId?: Nurse['nationalId'];
 };
 export type NurseCreation = Omit<typeof nurseTable.$inferInsert, 'password'> & {
@@ -95,6 +96,9 @@ export class NurseRepository {
   private buildFilterConditionFromUniqueTrait(nurseUniqueTrait: NurseUniqueTrait) {
     if (nurseUniqueTrait.id) {
       return eq(nurseTable.id, nurseUniqueTrait.id);
+    }
+    if (nurseUniqueTrait.email) {
+      return eq(nurseTable.email, nurseUniqueTrait.email);
     }
     return eq(nurseTable.nationalId, nurseUniqueTrait.nationalId!);
   }

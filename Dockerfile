@@ -9,8 +9,7 @@ COPY ./ ./
 COPY --from=project-dependencies ./glucohealth-backend/ ./
 RUN npm run build
 
-RUN chmod +x ./bootstrap.sh
-ENTRYPOINT ["./bootstrap.sh"]
+ENTRYPOINT ["npm", "run", "start:prod"]
 
 ARG APP_PORT=3000
 EXPOSE ${APP_PORT}

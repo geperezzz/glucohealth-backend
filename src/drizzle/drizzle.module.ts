@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 
 import { drizzleClient } from './drizzle.client';
+import { applyMigrations } from './drizzle.migrator';
 
 @Module({
   providers: [
@@ -11,4 +12,8 @@ import { drizzleClient } from './drizzle.client';
   ],
   exports: ['DRIZZLE_CLIENT'],
 })
-export class DrizzleModule {}
+export class DrizzleModule implements OnModuleInit {
+  async onModuleInit(): Promise<void> {
+    await applyMigrations();
+  }
+}

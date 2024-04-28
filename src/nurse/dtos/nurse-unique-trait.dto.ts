@@ -6,17 +6,20 @@ import { nurseDtoSchema } from './nurse.dto';
 export const nurseUniqueTraitDtoSchema = nurseDtoSchema
   .pick({
     id: true,
+    email: true,
     nationalId: true,
   })
   .partial()
   .refine(
-    ({ id, nationalId }) => !!id != !!nationalId, // Logical XOR
+    ({ id, email, nationalId }) =>
+      [!!id, !!email, !!nationalId].filter(trait => trait).length === 1,
     {
-      message: "Must specify only one of the following query params: id, nationalId",
+      message: "Must specify only one of the following query params: id, email, nationalId",
     },
   );
 
 export class NurseUniqueTraitDto extends createZodDto(nurseUniqueTraitDtoSchema) {
   id?: z.infer<typeof nurseUniqueTraitDtoSchema>['id'] = super.id;
-  nationalId?: z.infer<typeof nurseUniqueTraitDtoSchema>['nationalId'] = super['nationalId'];
+  email?: z.infer<typeof nurseUniqueTraitDtoSchema>['email'] = super.email;
+  nationalId?: z.infer<typeof nurseUniqueTraitDtoSchema>['nationalId'] = super.nationalId;
 }
