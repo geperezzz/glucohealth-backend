@@ -3,9 +3,7 @@ import { z } from 'nestjs-zod/z';
 
 import { patientDtoSchema } from './patient.dto';
 
-export const patientFiltersDtoSchema = patientDtoSchema
-  .omit({ password: true })
-  .partial();
+export const patientFiltersDtoSchema = patientDtoSchema.partial();
 
 export class PatientFiltersDto extends createZodDto(patientFiltersDtoSchema) {
   id?: z.infer<typeof patientFiltersDtoSchema>['id'] = super.id;

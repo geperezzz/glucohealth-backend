@@ -13,7 +13,6 @@ export const patientDtoSchema = z.object({
   age: z.coerce.number().int().min(0).nullable(),
   weightInKg: z.coerce.number().gt(0).nullable(),
   heightInCm: z.coerce.number().min(1).nullable(),
-  password: z.string().trim().min(1),
 });
 
 export class PatientDto extends createZodDto(patientDtoSchema) {

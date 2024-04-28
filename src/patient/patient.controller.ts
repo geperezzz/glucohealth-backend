@@ -9,6 +9,7 @@ import { PatientFiltersDto } from './dtos/patient-filters.dto';
 import { PatientPageDto } from './dtos/patient-page.dto';
 import { PaginationOptionsDto } from 'src/pagination/dtos/pagination-options.dto';
 import { PatientUniqueTraitDto } from './dtos/patient-unique-trait.dto';
+import { PatientWithPasswordDto } from './dtos/patient-with-password.dto';
 
 @Controller()
 @ApiTags('Patients')
@@ -20,9 +21,9 @@ export class PatientController {
   @Post('/patients/')
   async create(
     @Body() patientCreationDto: PatientCreationDto,
-  ): Promise<PatientDto> {
+  ): Promise<PatientWithPasswordDto> {
     const patient = await this.patientRepository.create(patientCreationDto);
-    return PatientDto.fromModel(patient);
+    return PatientWithPasswordDto.fromModel(patient);
   }
 
   @Get('/patients/')

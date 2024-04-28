@@ -1,9 +1,8 @@
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'nestjs-zod/z';
 
-import { patientDtoSchema } from './patient.dto';
+import { patientWithPasswordDtoSchema } from './patient-with-password.dto';
 
-export const patientCreationDtoSchema = patientDtoSchema
+export const patientCreationDtoSchema = patientWithPasswordDtoSchema
   .partial()
   .required({
     email: true,
